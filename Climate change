@@ -2,10 +2,10 @@
 1. Check the original dataset
 ```{r}
 summary(CT)
-str(CT$City)
+dim(CT)
 str(CT$Country)
 ```
-Due to the huge original dataset(time form 1743.11 to 2013.09, 3448 Cities, 159 Countries), we decide to choose the data from 1900.01 only for the United States, which also includes 350805 observations.
+Due to the huge original dataset(time form 1743.11 to 2013.09, 8599211 rows, 159 Countries), we decide to choose the data from 1900.01 only for the United States, which also includes 350805 observations.
 
 2. Choose the subset
 ```{r}
@@ -28,6 +28,7 @@ cityT <- cityT %>%
 write.csv(cityT, 'cityT.csv')
 ```
 
+
 3. Data character transformation 
 ```{r}
 cityT$date<-as.Date(cityT$date,"%Y-%m-%d")
@@ -37,4 +38,60 @@ cityT$month<-as.numeric(cityT$month,"%m")
 
 cityT$lat<-as.numeric(gsub("N|E|S|W", "",cityT$Latitude))*ifelse(grepl("S",cityT$Latitude),-1,1)
 cityT$long<-as.numeric(gsub("N|E|S|W", "", cityT$Longitude))*ifelse(grepl("W",cityT$Longitude),-1,1)
+
+cityT <- data.table(cityT)
+
+# remove Hawaii & Alaska
+cityT <- cityT %>%
+         filter(long>=-130 & lat>=25 & lat<=55)
+```
+
+4. US Temperature by Month and Year 1900-2012
+```{r}
+# choose subset
+aT <- cityT %>%
+       group_by(year, month) %>%
+       summarise(temp=mean(AverageTemperature))
+
+# month trance for different year
+ggplot(aT, aes(x=month, y=temp)) +
+  geom_jitter(aes(colour=year)) + ggtitle("US Temperature by Month and Year") +
+  labs(x="Month", y="Average Temperature")
+
+# year trance for different month
+ggplot(aT, aes(x=year, y=temp)) +
+  geom_jitter(aes(colour=factor(month))) + ggtitle("US Temperature by Month and Year") +
+  labs(x="Month", y="Average Temperature")
+```
+
+
+5. Boston Temperature by Month and Year 1900-2012
+```{r}
+# choose subset
+aTB <- cityT %>%
+       filter(City=="Boston") %>%
+       group_by(year, month)
+
+# month trance for different year
+ggplot(aTB, aes(x=month, y=AverageTemperature)) +
+  geom_jitter(aes(colour=year)) + ggtitle("Boston Temperature by Month and Year") +
+  labs(x="Month", y="Average Temperature")
+
+# year trance for different month
+ggplot(aTB, aes(x=year, y=AverageTemperature)) +
+  geom_jitter(aes(colour=factor(month))) + ggtitle("Boston Temperature by Month and Year") +
+  labs(x="Month", y="Average Temperature")
+```
+
+6. US Temperature by Year 1900-2012
+```{r}
+# choose subset
+aTy <- cityT %>%
+       group_by(year) %>%
+       summarise(temp=mean(AverageTemperature))
+
+# year trance
+ggplot(aTy, aes(x=year, y=temp)) +
+  geom_jitter(aes(colour=year)) + ggtitle("US Temperature by Year") + geom_smooth() +
+  labs(x="Year", y="Average Temperature")
 ```
