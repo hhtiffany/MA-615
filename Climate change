@@ -53,12 +53,12 @@ aT <- cityT %>%
        group_by(year, month) %>%
        summarise(temp=mean(AverageTemperature))
 
-# month trance for different year
+# month trend for different year
 ggplot(aT, aes(x=month, y=temp)) +
   geom_jitter(aes(colour=year)) + ggtitle("US Temperature by Month and Year") +
   labs(x="Month", y="Average Temperature")
 
-# year trance for different month
+# year trend for different month
 ggplot(aT, aes(x=year, y=temp)) +
   geom_jitter(aes(colour=factor(month))) + ggtitle("US Temperature by Month and Year") +
   labs(x="Month", y="Average Temperature")
@@ -72,12 +72,12 @@ aTB <- cityT %>%
        filter(City=="Boston") %>%
        group_by(year, month)
 
-# month trance for different year
+# month trend for different year
 ggplot(aTB, aes(x=month, y=AverageTemperature)) +
   geom_jitter(aes(colour=year)) + ggtitle("Boston Temperature by Month and Year") +
   labs(x="Month", y="Average Temperature")
 
-# year trance for different month
+# year trend for different month
 ggplot(aTB, aes(x=year, y=AverageTemperature)) +
   geom_jitter(aes(colour=factor(month))) + ggtitle("Boston Temperature by Month and Year") +
   labs(x="Month", y="Average Temperature")
@@ -94,4 +94,26 @@ aTy <- cityT %>%
 ggplot(aTy, aes(x=year, y=temp)) +
   geom_jitter(aes(colour=year)) + ggtitle("US Temperature by Year") + geom_smooth() +
   labs(x="Year", y="Average Temperature")
+```
+
+7. Heatmap for 5 main Cities
+```{r}
+# choose the subset
+hm <- cityT %>% 
+        group_by(month, City) %>%
+        summarise(temp=mean(AverageTemperature)) %>%
+        filter(City=="Boston" | City=="Chicago" | City=="Los Angeles" | City=="New York" | City=="Seattle")
+
+# Heatmap
+ggplot(hm, aes(x=month, y=City, fill=temp, frame=City)) +
+  geom_tile(color="white", size=0.1) +
+  scale_fill_gradient(name="Average Temperature", low="white", high="red") +
+  coord_equal() +
+  labs(x = "Months", y = "", title = "Average Temp from 1900 - 2012") +
+  theme_tufte() +
+  theme(axis.ticks = element_blank()) +
+  theme(axis.text = element_text(size = 14)) +
+  theme(plot.title = element_text(size = 15)) +
+  theme(legend.title = element_text(size = 15)) +
+  theme(legend.text = element_text(size = 10))
 ```
