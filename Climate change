@@ -1,24 +1,40 @@
+
 1. Check the original dataset
 ```{r}
-summary(GlobalLandTemperaturesByCity)
-str(GlobalLandTemperaturesByCity$City)
-str(GlobalLandTemperaturesByCity$Country)
+summary(CT)
+str(CT$City)
+str(CT$Country)
 ```
-Due to the huge original dataset(time form 1743.11 to 2013.09, 3448 Cities, 159 Countries), 
-we decide to choose the data from 1900.01 only for the United States, which also includes 350805 observations.
+Due to the huge original dataset(time form 1743.11 to 2013.09, 3448 Cities, 159 Countries), we decide to choose the data from 1900.01 only for the United States, which also includes 350805 observations.
 
 2. Choose the subset
 ```{r}
-cityT <- GlobalLandTemperaturesByCity %>%
-     filter(Country=="United States") %>%   # narrow down to United States
+cityT <- CT %>%
+     filter(Country=="United States") %>% # narrow down to United States
+     mutate(date=dt) %>%
      separate(dt, c("year", "month", "day")) %>% # sepearate the year month and day
      filter(year >= 1900)  # select the data after year 1990
   
 # drop the "day" and "Country" columns
-cityT <- subset(cityT, select = c(1,2,4,5,6,8,9))
+cityT <- subset(cityT, select = c(10,1,2,4,5,6,8,9))
 
 # check missing data
 cityT[!complete.cases(cityT),]
 
-# drop the last row due to the missing data
-cityT <- na.omit(cityT)
+# drop all the data for 2013.09
+cityT <- cityT %>%
+         filter(year!="2013" | month!="09")
+
+write.csv(cityT, 'cityT.csv')
+```
+
+3. Data character transformation 
+```{r}
+cityT$date<-as.Date(cityT$date,"%Y-%m-%d")
+cityT$year<-as.numeric(cityT$year,"%Y")
+cityT$month<-as.numeric(cityT$month,"%m")
+
+
+cityT$lat<-as.numeric(gsub("N|E|S|W", "",cityT$Latitude))*ifelse(grepl("S",cityT$Latitude),-1,1)
+cityT$long<-as.numeric(gsub("N|E|S|W", "", cityT$Longitude))*ifelse(grepl("W",cityT$Longitude),-1,1)
+```
