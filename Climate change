@@ -117,3 +117,31 @@ ggplot(hm, aes(x=month, y=City, fill=temp, frame=City)) +
   theme(legend.title = element_text(size = 15)) +
   theme(legend.text = element_text(size = 10))
 ```
+
+8. Temperature Trend by Season
+```{r}
+s <- function(m){
+            factor((m %% 12) %/% 3, labels = c('Winter', 'Spring', 'Summer', 'Autumn'))}
+
+par(mfrow=c(1,2))
+# US Tempreture by Season
+sus <- cityT %>%
+       group_by(year, season=s(month)) %>%
+       summarise(temp=mean(AverageTemperature))
+
+sus %>%
+    ggplot(mapping=aes(x=year, y=temp)) +
+     geom_line(mapping = aes(color=season)) +
+     theme_bw() + labs(x="Year", y="Average Temperature", title="US Season Temperature 1900-2012")
+
+# Boston Tempreture by Season
+sbo <- cityT %>%
+       filter(City=="Boston") %>%
+       group_by(year, season=s(month)) %>%
+       summarise(temp=mean(AverageTemperature))
+
+sbo %>%
+    ggplot(mapping=aes(x=year, y=temp)) +
+     geom_line(mapping = aes(color=season)) +
+     theme_bw() + labs(x="Year", y="Average Temperature", title="Boston Season Temperature 1900-2012")
+```
